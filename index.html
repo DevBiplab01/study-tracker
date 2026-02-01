@@ -62,7 +62,7 @@
     <div class="sub" id="todayDate"></div>
 
     <div class="top-grid">
-      <div class="card" id="streakCard">🔥 Streak: 0 days <small>Continuous study</small></div>
+      <div class="card" id="streakCard">🔥 Streak: 0 days <small>Sunday Rest Day ✅</small></div>
       <div class="card" id="doneCard">✅ Done: 0/0 <small>Today tasks</small></div>
       <div class="card" id="timerCard">⏳ Timer: 02:00:00 <small>2 Hours Countdown</small></div>
     </div>
@@ -78,7 +78,7 @@
         <button class="timerResetBtn" onclick="resetTimer()">♻ Reset (2:00:00)</button>
       </div>
 
-      <div class="hint">✅ Time auto-save hoga. 00:00:00 pe auto-stop + alert ✅</div>
+      <div class="hint">✅ Default 2 hours timer. 00:00:00 pe auto-stop + alert ✅</div>
     </div>
 
     <!-- Tasks -->
@@ -160,7 +160,7 @@
       return {
         tasks: defaultTasks.map(t => ({ text: t, done: false })),
         notes: "",
-        remainingSeconds: 2 * 60 * 60 // 2 hours
+        remainingSeconds: 2 * 60 * 60
       };
     }
 
@@ -337,8 +337,8 @@
     function isDayCompleted(dateKey) {
       const raw = localStorage.getItem(storageKey(dateKey));
       if (!raw) return false;
-      const data = JSON.parse(raw);
 
+      const data = JSON.parse(raw);
       if (!data.tasks || data.tasks.length === 0) return false;
 
       const doneCount = data.tasks.filter(t => t.done).length;
@@ -346,12 +346,20 @@
       return percent >= 75;
     }
 
+    // ✅ Sunday Rest Day: Sunday ko streak break nahi hoga
     function updateStreak() {
       let streak = 0;
       let checkDate = new Date(todayObj);
 
       while (true) {
+        // ✅ Sunday = Rest Day (Skip Sunday)
+        if (checkDate.getDay() === 0) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          continue;
+        }
+
         const key = formatDateKey(checkDate);
+
         if (isDayCompleted(key)) {
           streak++;
           checkDate.setDate(checkDate.getDate() - 1);
@@ -361,7 +369,7 @@
       }
 
       document.getElementById("streakCard").innerHTML =
-        `🔥 Streak: ${streak} days <small>Continuous study</small>`;
+        `🔥 Streak: ${streak} days <small>Sunday Rest Day ✅</small>`;
     }
 
     // -------- Calendar --------
@@ -405,7 +413,7 @@
 
         dayDiv.addEventListener("click", () => {
           const status = isDayCompleted(key) ? "✅ Completed" : "❌ Not Completed";
-          alert(`${new Date(dateObj).toDateString()}\nStatus: ${status}\n\nRule: 75%+ tasks done = Completed ✅`);
+          alert(`${new Date(dateObj).toDateString()}\nStatus: ${status}\n\nRule: 75%+ tasks done = Completed ✅\nSunday = Rest Day ✅`);
         });
 
         grid.appendChild(dayDiv);
